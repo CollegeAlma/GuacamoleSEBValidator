@@ -1,0 +1,14 @@
+{
+  "guacamoleVersion": "1.6.0",
+  "name": "Safe Exam Browser Validator",
+  "namespace": "seb-validation",
+  "authProviders": [
+    "org.collegealma.guacamole_seb_validator.SebAuthenticationProvider"
+  ],
+  "listeners": [
+    "org.collegealma.guacamole_seb_validator.SebValidationListener"
+  ],
+  "js": [
+    "seb-validation.js"
+  ]
+}

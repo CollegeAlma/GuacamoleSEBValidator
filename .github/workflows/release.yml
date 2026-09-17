@@ -1,0 +1,72 @@
+name: Release
+
+on:
+  push:
+    tags:
+      - 'v*'
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
+        with:
+          persist-credentials: false
+      - uses: actions/setup-java@de7274f081f381c8f8158605e0321c36c376e2e6 # v6
+        with:
+          distribution: temurin
+          java-version: '11'
+          cache: maven
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4
+        with:
+          node-version: '22'
+      - name: Verify release tag matches Maven version
+        env:
+          RELEASE_TAG: ${{ github.ref_name }}
+        run: |
+          version="$(mvn -q -Dstyle.color=never -DforceStdout help:evaluate -Dexpression=project.version)"
+          bash .github/scripts/check-release-version.sh "$RELEASE_TAG" "$version"
+      - name: Test JavaScript and release version checks
+        run: node --test src/test/javascript/*.test.cjs
+      - name: Build and test Java
+        run: mvn --batch-mode clean verify
+      - name: Stage tested release files
+        run: |
+          mkdir release-assets
+          cp target/guacamole-seb-validator-*.jar guacamole.properties.example release-assets/
+      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        with:
+          name: release-assets
+          path: release-assets/
+          if-no-files-found: error
+          retention-days: 7
+
+  publish:
+    needs: build
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093 # v4
+        with:
+          name: release-assets
+          path: release-assets
+      - name: Publish GitHub release
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GH_REPO: ${{ github.repository }}
+          RELEASE_TAG: ${{ github.ref_name }}
+        run: |
+          flags=()
+          if [[ "$RELEASE_TAG" == *-* ]]; then
+            flags+=(--prerelease --latest=false)
+          fi
+          gh release create "$RELEASE_TAG" "${flags[@]}" \
+            release-assets/guacamole-seb-validator-*.jar \
+            release-assets/guacamole.properties.example \
+            --verify-tag \
+            --title "$RELEASE_TAG" \
+            --generate-notes

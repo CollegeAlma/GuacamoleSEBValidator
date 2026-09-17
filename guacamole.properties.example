@@ -1,0 +1,19 @@
+# Example SEB validator settings for /etc/guacamole/guacamole.properties.
+# Merge these settings into your existing file, then restart Guacamole/Tomcat.
+
+# Require SEB for users belonging to ANY of these user groups.
+# Matching is case-sensitive; surrounding spaces
+# are ignored. These are user groups, not connection groups.
+# Users outside these groups can log in normally without SEB.
+# IMPORTANT: Omitting this property or leaving it blank disables enforcement.
+seb-required-user-groups: students, exam-candidates
+
+# 64-character hexadecimal Config Key displayed by SEB Config Tool after saving your final .seb configuration.
+# Do not use the URL-specific ConfigKeyHash sent in an HTTP request.
+# Multiple Config Keys may be comma-separated during a configuration transition.
+seb-config-keys: REPLACE_WITH_YOUR_64_CHARACTER_CONFIG_KEY
+
+# Lifetime of a successful SEB JavaScript API handshake for completing login.
+# Allowed range: 30 through 3600 seconds. Default: 300.
+# The browser renews at half this lifetime, capped at 60 seconds.
+seb-validation-max-age-seconds: 300

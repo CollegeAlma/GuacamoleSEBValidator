@@ -1,0 +1,18 @@
+# Build and editor output
+/target/
+/release-assets/
+/.idea/
+*.iml
+.DS_Store
+
+# Deployment credentials and exam configurations
+/guacamole.properties
+.env
+.env.*
+!.env.example
+*.seb
+*.pem
+*.key
+*.p12
+*.pfx
+*.jks
